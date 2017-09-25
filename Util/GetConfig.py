@@ -25,7 +25,8 @@ class GetConfig(object):
 
     def __init__(self):
         self.pwd = os.path.split(os.path.realpath(__file__))[0]
-        self.config_path = os.path.join(os.path.split(self.pwd)[0], 'Config.ini')
+        self.config_path = os.path.join(
+            os.path.split(self.pwd)[0], 'Config.ini')
         self.config_file = ConfigParse()
         self.config_file.read(self.config_path)
 
@@ -46,15 +47,19 @@ class GetConfig(object):
         return int(self.config_file.get('DB', 'port'))
 
     @LazyProperty
+    def db_password(self):
+        return self.config_file.get('DB', 'password', fallback=None)
+
+    @LazyProperty
     def proxy_getter_functions(self):
         return self.config_file.options('ProxyGetter')
 
     @LazyProperty
     def validator_url(self):
-        return self.config_file.get('Validator','url')
+        return self.config_file.get('Validator', 'url')
 
     def host_ip(self):
-        return self.config_file.get('HOST','ip')
+        return self.config_file.get('HOST', 'ip')
 
     @LazyProperty
     def host_port(self):
