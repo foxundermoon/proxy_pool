@@ -13,6 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 	echo "python main.py" >> /usr/src/app/run.sh && \
 	chmod 777 run.sh
 
-EXPOSE 5000
+EXPOSE 5010
 
 CMD [ "sh", "run.sh" ]

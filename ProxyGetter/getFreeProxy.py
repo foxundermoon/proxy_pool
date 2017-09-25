@@ -13,6 +13,7 @@
 """
 import re
 import requests
+from Util.utilFunction import validUsefulProxy
 
 try:
     from importlib import reload  # py3 实际不会实用，只是为了不显示语法错误
@@ -35,6 +36,7 @@ class GetFreeProxy(object):
     """
 
     def __init__(self):
+        self.config = GetConfig()
         pass
 
     @staticmethod
@@ -149,7 +151,14 @@ class GetFreeProxy(object):
                 if code is 0 and jsonBody["success"]:
                     data = jsonBody["data"]
                     for item in data:
-                        yield "{}:{}".format(item["ip"], item["port"])
+                        ip = item["ip"]
+                        port = item["port"]
+                        city = item["city"]
+                        isp = item["isp"]
+                        proxy = "{ip}:{port}:{city}|{isp}".format(
+                            ip=ip, port=port, city=city, isp=isp)
+                        if validUsefulProxy(proxy):
+                            yield proxy
                 else:
                     print jsonBody["msg"]
 
@@ -168,8 +177,8 @@ if __name__ == '__main__':
     # for e in gg.freeProxyFourth():
     #     print(e)
 
-    for e in gg.freeProxyFifth():
-        print(e)
-
-    # for e in gg.taiyangProxySix():
+    # for e in gg.freeProxyFifth():
     #     print(e)
+
+    for e in gg.taiyangProxySix():
+        print(e)

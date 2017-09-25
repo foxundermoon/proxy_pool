@@ -16,6 +16,7 @@ from lxml import etree
 
 from Util.LogHandler import LogHandler
 from Util.WebRequest import WebRequest
+from Util.GetConfig import GetConfig
 
 logger = LogHandler(__name__, stream=False)
 
@@ -68,6 +69,9 @@ def getHtmlTree(url, **kwargs):
 
 
 # noinspection PyPep8Naming
+validatorUrl = GetConfig().validator_url
+
+
 def validUsefulProxy(proxy):
     """
     检验代理是否可用
@@ -76,13 +80,29 @@ def validUsefulProxy(proxy):
     """
     if isinstance(proxy, bytes):
         proxy = proxy.decode('utf8')
-    proxies = {"https": "https://{proxy}".format(proxy=proxy)}
+    parts = proxy.split(":")
+    ip = parts[0]
+    port = parts[1]
+    city = ''
+    net = ''
+    if len(parts) > 2:
+        extra = parts[3].split("|")
+        city = extra[0]
+        net = extra[1]
+
+    proxies = {"https": "https://{ip}:{port}".format(ip=ip, port=port)}
     try:
         # 超过20秒的代理就不要了
-        r = requests.get('https://www.baidu.com', proxies=proxies, timeout=20, verify=False)
+        r = requests.get(validatorUrl + ip,
+                         proxies=proxies, timeout=10, verify=False)
         if r.status_code == 200:
-            logger.info('%s is ok' % proxy)
-            return True
+            body = r.json()
+            if 'success' in body and body['success']:
+                headers = body['headers']
+                if body['city'] == city and 'x-real-ip' not in headers and 'x-forward-for' not in headers:
+                    logger.info('%s is ok' % proxy)
+                    return True
+        return False
     except Exception as e:
         logger.debug(e)
         return False

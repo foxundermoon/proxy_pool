@@ -22,6 +22,13 @@ class GetConfig(object):
     """
     to get config from config.ini
     """
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(
+                GetConfig, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
     def __init__(self):
         self.pwd = os.path.split(os.path.realpath(__file__))[0]
