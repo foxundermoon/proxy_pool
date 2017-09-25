@@ -49,6 +49,10 @@ class GetConfig(object):
     def proxy_getter_functions(self):
         return self.config_file.options('ProxyGetter')
 
+    @LazyProperty
+    def validator_url(self):
+        return self.config_file.get('Validator','url')
+
 
 if __name__ == '__main__':
     gg = GetConfig()
@@ -57,3 +61,4 @@ if __name__ == '__main__':
     print(gg.db_host)
     print(gg.db_port)
     print(gg.proxy_getter_functions)
+    print(gg.validator_url)
