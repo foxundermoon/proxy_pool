@@ -155,10 +155,10 @@ class GetFreeProxy(object):
                             port = item["port"]
                             city = item["city"]
                             isp = item["isp"]
-                            proxy = "{ip}:{port}:{city}|{isp}".format(
-                                ip=ip, port=port, city=city, isp=isp)
-                            if validUsefulProxy(proxy):
-                                yield proxy
+                            proxy = "{ip}:{port}".format(
+                                ip=ip, port=port)
+                            extra = {'city': city, 'isp': isp}
+                            yield (proxy, extra)
                     else:
                         print jsonBody["msg"]
         except Exception:

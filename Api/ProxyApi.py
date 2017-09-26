@@ -43,21 +43,7 @@ def index():
 @app.route('/get/')
 def get():
     proxy = ProxyManager().get()
-    return jsonify(stringProxyToDict(proxy))
-
-
-def stringProxyToDict(proxy):
-    rsp = {}
-    if proxy:
-        parts = proxy.split(":")
-        rsp['ip'] = parts[0]
-        rsp['port'] = parts[1]
-        if len(parts) > 2:
-            extra = parts[2].split("|")
-            rsp['city'] = extra[0]
-            if len(extra) > 1:
-                rsp['isp'] = extra[1]
-    return rsp
+    return jsonify(proxy)
 
 
 @app.route('/refresh/')
@@ -71,7 +57,7 @@ def refresh():
 @app.route('/get_all/')
 def getAll():
     proxies = ProxyManager().getAll()
-    return jsonify(map(stringProxyToDict, proxies))
+    return jsonify(proxies)
 
 
 @app.route('/delete/', methods=['GET'])

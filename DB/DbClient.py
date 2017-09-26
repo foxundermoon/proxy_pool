@@ -92,6 +92,10 @@ class DbClient(object):
     def exists(self, key, **kwargs):
         return self.client.exists(key, **kwargs)
 
+    def existsUsed(self, key, **kwargs):
+        self.changeUsed()
+        return self.client.exists(key, **kwargs)
+
     def pop(self, **kwargs):
         return self.client.pop(**kwargs)
 
