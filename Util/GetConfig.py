@@ -2,7 +2,7 @@
 # !/usr/bin/env python
 """
 -------------------------------------------------
-   File Name：     GetConfig.py  
+   File Name：     GetConfig.py
    Description :  fetch config from config.ini
    Author :       JHao
    date：          2016/12/3
@@ -22,14 +22,6 @@ class GetConfig(object):
     """
     to get config from config.ini
     """
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(
-                GetConfig, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
     def __init__(self):
         self.pwd = os.path.split(os.path.realpath(__file__))[0]
         self.config_path = os.path.join(
@@ -55,7 +47,7 @@ class GetConfig(object):
 
     @LazyProperty
     def db_password(self):
-        return self.config_file.get('DB', 'password', fallback=None)
+        return self.config_file.get('DB', 'password')
 
     @LazyProperty
     def proxy_getter_functions(self):
@@ -65,6 +57,7 @@ class GetConfig(object):
     def validator_url(self):
         return self.config_file.get('Validator', 'url')
 
+    @LazyProperty
     def host_ip(self):
         return self.config_file.get('HOST', 'ip')
 

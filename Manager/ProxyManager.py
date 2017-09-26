@@ -44,7 +44,8 @@ class ProxyManager(object):
             # fetch raw proxy
             for proxy in getattr(GetFreeProxy, proxyGetter.strip())():
                 if proxy:
-                    self.log.info('{func}: fetch proxy {proxy}'.format(func=proxyGetter, proxy=proxy))
+                    self.log.info('{func}: fetch proxy {proxy}'.format(
+                        func=proxyGetter, proxy=proxy))
                     proxy_set.add(proxy.strip())
 
             # store raw proxy

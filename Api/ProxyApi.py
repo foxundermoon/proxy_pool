@@ -21,7 +21,6 @@ from flask import Flask, jsonify, request
 from Util.GetConfig import GetConfig
 
 
-
 from Manager.ProxyManager import ProxyManager
 
 app = Flask(__name__)
@@ -44,7 +43,21 @@ def index():
 @app.route('/get/')
 def get():
     proxy = ProxyManager().get()
-    return proxy
+    return jsonify(stringProxyToDict(proxy))
+
+
+def stringProxyToDict(proxy):
+    rsp = {}
+    if proxy:
+        parts = proxy.split(":")
+        rsp['ip'] = parts[0]
+        rsp['port'] = parts[1]
+        if len(parts) > 2:
+            extra = parts[2].split("|")
+            rsp['city'] = extra[0]
+            if len(extra) > 1:
+                rsp['isp'] = extra[1]
+    return rsp
 
 
 @app.route('/refresh/')
@@ -58,7 +71,7 @@ def refresh():
 @app.route('/get_all/')
 def getAll():
     proxies = ProxyManager().getAll()
-    return jsonify(proxies)
+    return jsonify(map(stringProxyToDict, proxies))
 
 
 @app.route('/delete/', methods=['GET'])
