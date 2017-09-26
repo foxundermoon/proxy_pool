@@ -87,6 +87,9 @@ class RedisClient(object):
     def inckey(self, key, value):
         self.__conn.hincrby(self.name, key, value)
 
+    def exists(self, key):
+        return self.__conn.hexists(self.name, key)
+
     def getAll(self):
         # return self.__conn.hgetall(self.name).keys()
         # python3 redis返回bytes类型,需要解码
