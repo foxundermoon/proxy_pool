@@ -142,24 +142,27 @@ class GetFreeProxy(object):
             'Accept-Language': 'zh-CN,zh;q=0.8',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3212.0 Safari/537.36',
         }
-        response = requests.get(url, headers=headers, timeout=30)
-        if response.status_code is 200:
-            jsonBody = response.json()
-            if "data" in jsonBody and "code" in jsonBody and "success" in jsonBody:
-                code = jsonBody["code"]
-                if code is 0 and jsonBody["success"]:
-                    data = jsonBody["data"]
-                    for item in data:
-                        ip = item["ip"]
-                        port = item["port"]
-                        city = item["city"]
-                        isp = item["isp"]
-                        proxy = "{ip}:{port}:{city}|{isp}".format(
-                            ip=ip, port=port, city=city, isp=isp)
-                        if validUsefulProxy(proxy):
-                            yield proxy
-                else:
-                    print jsonBody["msg"]
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            if response.status_code is 200:
+                jsonBody = response.json()
+                if "data" in jsonBody and "code" in jsonBody and "success" in jsonBody:
+                    code = jsonBody["code"]
+                    if code is 0 and jsonBody["success"]:
+                        data = jsonBody["data"]
+                        for item in data:
+                            ip = item["ip"]
+                            port = item["port"]
+                            city = item["city"]
+                            isp = item["isp"]
+                            proxy = "{ip}:{port}:{city}|{isp}".format(
+                                ip=ip, port=port, city=city, isp=isp)
+                            if validUsefulProxy(proxy):
+                                yield proxy
+                    else:
+                        print jsonBody["msg"]
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':
