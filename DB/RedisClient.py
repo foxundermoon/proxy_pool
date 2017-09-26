@@ -22,7 +22,7 @@ class RedisClient(object):
     Reids client
     """
 
-    def __init__(self, name, host, port,password=None):
+    def __init__(self, name, host, port, password=None):
         """
         init
         :param name:
@@ -31,7 +31,8 @@ class RedisClient(object):
         :return:
         """
         self.name = name
-        self.__conn = redis.Redis(host=host, port=port, db=0,password=password)
+        self.__conn = redis.Redis(
+            host=host, port=port, db=0, password=password)
 
     def get(self):
         """

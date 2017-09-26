@@ -82,3 +82,4 @@ if __name__ == '__main__':
     print(gg.validator_url)
     print(gg.host_ip)
     print(gg.host_port)
+    print(gg.db_password)
