@@ -52,7 +52,7 @@ class ProxyValidSchedule(ProxyManager):
                         self.db.delete(each_proxy)
                     else:
                         self.db.update(each_proxy, -1)
-                    self.log.info('ProxyValidSchedule: {} validation fail'.format(each_proxy))
+                        self.log.info('ProxyValidSchedule: {} validation fail'.format(each_proxy))
 
             self.log.info('ProxyValidSchedule running normal')
             sleep(60 * 1)

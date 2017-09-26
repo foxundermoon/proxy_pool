@@ -36,7 +36,6 @@ class GetFreeProxy(object):
     """
 
     def __init__(self):
-        self.config = GetConfig()
         pass
 
     @staticmethod
@@ -136,7 +135,7 @@ class GetFreeProxy(object):
         """
         太阳🌞代理 http://www.taiyangruanjian.com/        
         """
-        url = "http://http-api.taiyangruanjian.com/getip?num=50&type=2&pro=0&city=0&yys=0&port=11&pack=2664&ts=0&ys=0&cs=1&lb=1&sb=0&pb=5&mr=1"
+        url = "http://http-api.taiyangruanjian.com/getip?num=50&type=2&pro=0&city=0&yys=0&port=11&pack=2664&ts=0&ys=1&cs=1&lb=1&sb=0&pb=5&mr=1"
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Connection': 'keep-alive',

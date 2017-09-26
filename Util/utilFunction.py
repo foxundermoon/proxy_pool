@@ -84,11 +84,12 @@ def validUsefulProxy(proxy):
     ip = parts[0]
     port = parts[1]
     city = ''
-    net = ''
+    isp = ''
     if len(parts) > 2:
-        extra = parts[3].split("|")
+        extra = parts[2].split("|")
         city = extra[0]
-        net = extra[1]
+        if len(extra) > 1:
+            isp = extra[1]
 
     proxies = {"https": "https://{ip}:{port}".format(ip=ip, port=port)}
     try:
