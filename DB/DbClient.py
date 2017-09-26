@@ -18,7 +18,7 @@ import sys
 
 from Util.GetConfig import GetConfig
 from Util.utilClass import Singleton
-
+from Util.EnvUtil import raw_proxy_queue, useful_proxy_queue
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -70,7 +70,8 @@ class DbClient(object):
             __type = "RedisClient"
         else:
             pass
-        assert __type, 'type error, Not support DB type: {}'.format(self.config.db_type)
+        assert __type, 'type error, Not support DB type: {}'.format(
+            self.config.db_type)
         self.client = getattr(__import__(__type), __type)(name=self.config.db_name,
                                                           host=self.config.db_host,
                                                           port=self.config.db_port,
@@ -79,8 +80,8 @@ class DbClient(object):
     def get(self, key, **kwargs):
         return self.client.get(key, **kwargs)
 
-    def put(self, key, **kwargs):
-        return self.client.put(key, **kwargs)
+    def put(self, key, value=1, **kwargs):
+        return self.client.put(key, value, **kwargs)
 
     def update(self, key, value, **kwargs):
         return self.client.update(key, value, **kwargs)
@@ -97,16 +98,53 @@ class DbClient(object):
     def getAll(self):
         return self.client.getAll()
 
+    def getAllUsed(self):
+        self.changeUsed()
+        return self.getAll()
+
+    def getAllRaw(self):
+        self.changeRaw()
+        return self.getAll()
+
     def changeTable(self, name):
         self.client.changeTable(name)
+
+    def changeRaw(self):
+        self.client.changeTable(raw_proxy_queue)
+
+    def changeUsed(self):
+        self.client.changeTable(useful_proxy_queue)
+
+    def getRaw(self, key, **kwargs):
+        self.changeRaw()
+        return self.get(key, **kwargs)
+
+    def getUsed(self, key, **kwargs):
+        self.changeUsed()
+        return self.get(key, **kwargs)
+
+    def putRaw(self, key, value=1, **kwargs):
+        self.changeRaw()
+        return self.put(key, value, **kwargs)
+
+    def putUsed(self, key, value=1, **kwargs):
+        self.changeUsed()
+        return self.put(key, value, **kwargs)
 
     def getNumber(self):
         return self.client.getNumber()
 
 
 if __name__ == "__main__":
-    account = DbClient()
-    print(account.get())
-    account.changeTable('use')
-    account.put('ac')
-    print(account.get())
+    db = DbClient()
+    proxy1 = "1.2.3.4:88"
+    proxy2 = "1.2.3.5:99"
+    extra = {'city': "济南", 'isp': "联通"}
+    print(db.putRaw(proxy1, extra))
+    print(db.putUsed(proxy2))
+    print(db.putRaw(proxy2, extra))
+
+    rst = db.getRaw(proxy1)
+    print(rst)
+    rstU = db.getUsed(proxy2)
+    print(rstU)

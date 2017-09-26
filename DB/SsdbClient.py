@@ -19,6 +19,7 @@ from Util import EnvUtil
 from redis.connection import BlockingConnectionPool
 from redis import Redis
 import random
+import json
 
 
 class SsdbClient(object):
@@ -31,7 +32,7 @@ class SsdbClient(object):
 
     """
 
-    def __init__(self, name, host, port):
+    def __init__(self, name, host, port, password=None):
         """
         init
         :param name: hash name
@@ -40,7 +41,8 @@ class SsdbClient(object):
         :return:
         """
         self.name = name
-        self.__conn = Redis(connection_pool=BlockingConnectionPool(host=host, port=port))
+        self.__conn = Redis(connection_pool=BlockingConnectionPool(
+            host=host, port=port, password=password))
 
     def get(self, proxy):
         """
@@ -50,19 +52,31 @@ class SsdbClient(object):
         :return:
         """
         data = self.__conn.hget(name=self.name, key=proxy)
-        if data:
-            return data.decode('utf-8') if EnvUtil.PY3 else data
+        if isinstance(data, str):
+            if len(data) > 4:
+                try:
+                    return json.loads(data)
+                except Exception:
+                    pass
+            return data
+        elif isinstance(data, int):
+            return data
         else:
             return None
 
-    def put(self, proxy, num=1):
+    def put(self, proxy, value):
         """
         将代理放入hash, 使用changeTable指定hash name
         :param proxy:
         :param num:
         :return:
         """
-        data = self.__conn.hincrby(self.name, proxy, num)
+        if isinstance(value, int):
+            data = self.__conn.hincrby(self.name, proxy, value)
+        elif isinstance(value, str):
+            data = self.__conn.hset(self.name, proxy, value)
+        else:
+            data = self.__conn.hset(self.name, proxy, json.dumps(value))
         return data
 
     def delete(self, key):
@@ -74,7 +88,12 @@ class SsdbClient(object):
         self.__conn.hdel(self.name, key)
 
     def update(self, key, value):
-        self.__conn.hincrby(self.name, key, value)
+        if isinstance(value, int):
+            self.__conn.hincrby(self.name, key, value)
+        elif isinstance(value, str):
+            self.__conn.hset(self.name, key, value)
+        else:
+            self.__conn.hset(self.name, key, json.dumps(value))
 
     def pop(self):
         proxies = self.__conn.hkeys(self.name)

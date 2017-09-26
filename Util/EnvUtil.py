@@ -15,3 +15,6 @@ __author__ = 'J_hao'
 import sys
 
 PY3 = sys.version_info >= (3,)
+
+raw_proxy_queue = 'raw_proxy'
+useful_proxy_queue = 'useful_proxy'
