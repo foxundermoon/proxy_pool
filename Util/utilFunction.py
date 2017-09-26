@@ -78,31 +78,35 @@ def validUsefulProxy(proxy):
     :param proxy:
     :return:
     """
-    if isinstance(proxy, bytes):
-        proxy = proxy.decode('utf8')
-    parts = proxy.split(":")
-    ip = parts[0]
-    port = parts[1]
-    city = ''
-    isp = ''
-    if len(parts) > 2:
-        extra = parts[2].split("|")
-        city = extra[0]
-        if len(extra) > 1:
-            isp = extra[1]
+    isp = None
+    city = None
+    type = 'https'
+    extra = None
+    if isinstance(proxy, str):
+        ipPort = proxy
+    elif isinstance(proxy, tuple):
+        ipPort, extra = proxy
+        isp = extra['isp'] if 'isp' in extra else isp
+        city = extra['city'] if 'city' in extra else city
+        type = extra['type'] if 'type' in extra else type
+    proxies = {type: "{type}://{ipPort}".format(type=type, ipPort=ipPort)}
 
-    proxies = {"https": "https://{ip}:{port}".format(ip=ip, port=port)}
     try:
         # 超过20秒的代理就不要了
-        r = requests.get(validatorUrl + ip,
+        r = requests.get(validatorUrl + ipPort,
                          proxies=proxies, timeout=10, verify=False)
         if r.status_code == 200:
             body = r.json()
             if 'success' in body and body['success']:
+                logger.info('%s is ok' % ipPort)
                 headers = body['headers']
-                if body['city'] == city and 'x-real-ip' not in headers and 'x-forward-for' not in headers:
-                    logger.info('%s is ok' % proxy)
-                    return True
+                if 'city' in body:
+                    extra['rc'] = body['city']
+                if 'x-real-ip' in headers or 'x-forward-for' in headers:
+                    extra['am'] = False
+                else:
+                    extra['am'] = True
+            return extra
         return False
     except Exception as e:
         logger.debug(e)

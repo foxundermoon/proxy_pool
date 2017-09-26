@@ -86,8 +86,27 @@ class DbClient(object):
     def update(self, key, value, **kwargs):
         return self.client.update(key, value, **kwargs)
 
+    def updateUsed(self, key, value, **kwargs):
+        self.changeUsed()
+        return self.update(key, value, **kwargs)
+
+    def updateRaw(self, key, value, **kwargs):
+        self.changeRaw()
+        return self.update(key, value, **kwargs)
+
     def delete(self, key, **kwargs):
         return self.client.delete(key, **kwargs)
+
+    def deleteRaw(self, key, **kwargs):
+        self.changeRaw()
+        return self.delete(key, **kwargs)
+
+    def deleteUsed(self, key, **kwargs):
+        self.changeUsed()
+        return self.delete(key, **kwargs)
+
+    def deleteAll(self, key, **kwargs):
+        return (self.deleteRaw(key, **kwargs), self.deleteUsed(key, **kwargs))
 
     def exists(self, key, **kwargs):
         return self.client.exists(key, **kwargs)

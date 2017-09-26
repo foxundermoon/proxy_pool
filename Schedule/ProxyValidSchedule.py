@@ -20,9 +20,11 @@ sys.path.append('../')
 from Util.utilFunction import validUsefulProxy
 from Manager.ProxyManager import ProxyManager
 from Util.LogHandler import LogHandler
+import json
 
 
 class ProxyValidSchedule(ProxyManager):
+
     def __init__(self):
         ProxyManager.__init__(self)
         self.log = LogHandler('valid_schedule')
@@ -33,26 +35,33 @@ class ProxyValidSchedule(ProxyManager):
         :return:
         """
         while True:
-            self.db.changeTable(self.useful_proxy_queue)
-            for each_proxy in self.db.getAll():
-                if isinstance(each_proxy, bytes):
-                    # 兼容PY3
-                    each_proxy = each_proxy.decode('utf-8')
-
-                value = self.db.get(each_proxy)
-                if validUsefulProxy(each_proxy):
+            allProxy = self.db.getAllRaw()
+            for each_proxy in allProxy:
+                value = self.db.getUsed(each_proxy)
+                extra = allProxy[each_proxy]
+                try:
+                    if len(extra) > 5:
+                        extra = json.loads(extra)
+                except Exception:
+                    pass
+                val = validUsefulProxy((each_proxy, extra))
+                if val:
                     # 成功计数器加1
                     if value and int(value) < 1:
-                        self.db.update(each_proxy, 1)
-                    self.log.info('ProxyValidSchedule: {} validation pass'.format(each_proxy))
+                        self.db.updateUsed(each_proxy, 1)
+                    self.log.info(
+                        'ProxyValidSchedule: {} validation pass'.format(each_proxy))
+                    if isinstance(val, dict):
+                        self.db.updateRaw(each_proxy, extra)
                 else:
                     # 失败计数器减一
                     if value and int(value) < -5:
                         # 计数器小于-5删除该代理
-                        self.db.delete(each_proxy)
+                        self.db.deleteAll(each_proxy)
                     else:
-                        self.db.update(each_proxy, -1)
-                        self.log.info('ProxyValidSchedule: {} validation fail'.format(each_proxy))
+                        self.db.updateUsed(each_proxy, -1)
+                        self.log.info(
+                            'ProxyValidSchedule: {} validation fail'.format(each_proxy))
 
             self.log.info('ProxyValidSchedule running normal')
             sleep(60 * 1)
