@@ -21,6 +21,8 @@ from Util.utilFunction import validUsefulProxy
 from Manager.ProxyManager import ProxyManager
 from Util.LogHandler import LogHandler
 import json
+import datetime
+import time
 
 
 class ProxyValidSchedule(ProxyManager):
@@ -57,7 +59,12 @@ class ProxyValidSchedule(ProxyManager):
                     # 失败计数器减一
                     if value and int(value) < -5:
                         # 计数器小于-5删除该代理
-                        self.db.deleteAll(each_proxy)
+                        self.db.deleteUsed(each_proxy)
+                        timediff = time.mktime(
+                            datetime.datetime.now().timetuple()) - extra['exp']
+                        # 删除超过十天的 raw proxy
+                        if timediff > 10 * 24 * 60 * 60:
+                            self.db.deleteRaw(each_proxy)
                     else:
                         self.db.updateUsed(each_proxy, -1)
                         self.log.info(

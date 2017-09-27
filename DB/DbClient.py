@@ -113,7 +113,7 @@ class DbClient(object):
 
     def existsUsed(self, key, **kwargs):
         self.changeUsed()
-        return self.client.exists(key, **kwargs)
+        return self.exists(key, **kwargs)
 
     def pop(self, **kwargs):
         return self.client.pop(**kwargs)

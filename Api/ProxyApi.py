@@ -43,7 +43,7 @@ def index():
 @app.route('/get/')
 def get():
     proxy = ProxyManager().get()
-    return jsonify(proxy)
+    return jsonify(proxy if proxy is not None else {})
 
 
 @app.route('/refresh/')
