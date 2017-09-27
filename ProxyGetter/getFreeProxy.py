@@ -14,6 +14,8 @@
 import re
 import requests
 from Util.utilFunction import validUsefulProxy
+from datetime import datetime
+import time
 
 try:
     from importlib import reload  # py3 实际不会实用，只是为了不显示语法错误
@@ -142,27 +144,46 @@ class GetFreeProxy(object):
             'Accept-Language': 'zh-CN,zh;q=0.8',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3212.0 Safari/537.36',
         }
-        try:
-            response = requests.get(url, headers=headers, timeout=30)
-            if response.status_code is 200:
-                jsonBody = response.json()
-                if "data" in jsonBody and "code" in jsonBody and "success" in jsonBody:
-                    code = jsonBody["code"]
-                    if code is 0 and jsonBody["success"]:
-                        data = jsonBody["data"]
-                        for item in data:
-                            ip = item["ip"]
-                            port = item["port"]
-                            city = item["city"]
-                            isp = item["isp"]
-                            proxy = "{ip}:{port}".format(
-                                ip=ip, port=port)
-                            extra = {'city': city, 'isp': isp}
-                            yield (proxy, extra)
-                    else:
-                        print jsonBody["msg"]
-        except Exception:
-            pass
+
+        proxy_dic = {
+            'http': 'http://http-api.taiyangruanjian.com/getip?num=50&type=2&pro=0&city=0&yys=0&port=1&pack=2664&ts=1&ys=1&cs=1&lb=1&sb=0&pb=4&mr=1',
+
+            'https': 'http://http-api.taiyangruanjian.com/getip?num=50&type=2&pro=0&city=0&yys=0&port=11&pack=2664&ts=1&ys=1&cs=1&lb=1&sb=0&pb=4&mr=1',
+
+            'socks5': 'http://http-api.taiyangruanjian.com/getip?num=50&type=2&pro=0&city=0&yys=0&port=2&pack=2664&ts=1&ys=1&cs=1&lb=1&sb=0&pb=4&mr=1',
+        }
+
+        dateFormat = '%Y-%m-%d %H:%M:%S'  # 2017-09-27 13:10:17
+        for type in proxy_dic:
+            try:
+                response = requests.get(
+                    proxy_dic[type], headers=headers, timeout=30)
+                if response.status_code is 200:
+                    jsonBody = response.json()
+                    if "data" in jsonBody and "code" in jsonBody and "success" in jsonBody:
+                        code = jsonBody["code"]
+                        if code is 0 and jsonBody["success"]:
+                            data = jsonBody["data"]
+                            for item in data:
+                                ip = item["ip"]
+                                port = item["port"]
+                                city = item["city"]
+                                isp = item["isp"]
+                                expire_time = item['expire_time']
+                                exp_date = datetime.strptime(
+                                    expire_time, dateFormat)
+                                exp = int(time.mktime(exp_date.timetuple()))
+                                proxy = "{ip}:{port}".format(
+                                    ip=ip, port=port)
+                                extra = {'city': city, 'isp': isp,
+                                         'type': type, 'exp': exp}
+                                yield (proxy, extra)
+                        else:
+                            print(jsonBody["msg"])
+            except Exception as e:
+                print(e)
+                pass
+            time.sleep(3)
 
 
 if __name__ == '__main__':
