@@ -40,7 +40,7 @@ class ProxyValidSchedule(ProxyManager):
                 value = self.db.getUsed(each_proxy)
                 extra = allProxy[each_proxy]
                 try:
-                    if len(extra) > 5:
+                    if isinstance(extra, str) and len(extra) > 5:
                         extra = json.loads(extra)
                 except Exception:
                     pass

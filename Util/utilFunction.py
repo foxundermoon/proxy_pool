@@ -17,6 +17,7 @@ from lxml import etree
 from Util.LogHandler import LogHandler
 from Util.WebRequest import WebRequest
 from Util.GetConfig import GetConfig
+from Util.EnvUtil import SERVER_IPS
 
 logger = LogHandler(__name__, stream=False)
 
@@ -80,8 +81,9 @@ def validUsefulProxy(proxy):
     """
     isp = None
     city = None
-    type = 'https'
+    type = 'http'
     extra = None
+    ipPort = None
     if isinstance(proxy, str):
         ipPort = proxy
     elif isinstance(proxy, tuple):
@@ -89,7 +91,9 @@ def validUsefulProxy(proxy):
         isp = extra['isp'] if 'isp' in extra else isp
         city = extra['city'] if 'city' in extra else city
         type = extra['type'] if 'type' in extra else type
-    proxies = {type: "{type}://{ipPort}".format(type=type, ipPort=ipPort)}
+
+    proxyForVali = "{type}://{ipPort}".format(type=type, ipPort=ipPort)
+    proxies = {'http': proxyForVali, 'https': proxyForVali}
 
     try:
         # 超过20秒的代理就不要了
@@ -100,10 +104,18 @@ def validUsefulProxy(proxy):
             if 'success' in body and body['success']:
                 logger.info('%s is ok' % ipPort)
                 headers = body['headers']
+                logger.debug(headers)
                 if 'city' in body:
                     extra['rc'] = body['city']
-                if 'x-real-ip' in headers or 'x-forward-for' in headers:
-                    extra['am'] = False
+                if 'x-real-ip' in headers or 'x-forwarded-for' in headers:
+                    realIp = headers[
+                        'x-real-ip'] if 'x-real-ip' in headers else headers['x-forwarded-for']
+                    if ',' in realIp:
+                        forwards = realIp.split(",")
+                        realIp = forwards[len(forwards) - 1]
+                    if realIp in SERVER_IPS:
+                        extra['am'] = False
+                    extra['rip'] = realIp
                 else:
                     extra['am'] = True
             return extra

@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [{
+            "name": "Python",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${file}",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "PYTHONPATH": "${PYTHONPATH}:${workspaceRoot}"
+            },
+            "envFile": "${workspaceRoot}/.env",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        },
+        {
+            "name": "Integrated Terminal/Console",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${file}",
+            "cwd": "${workspaceRoot}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${PYTHONPATH}:${workspaceRoot}"
+                // ,"http_proxy": "http://gt78.fox.mn:7777"
+            },
+            "envFile": "${workspaceRoot}/.env",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit"
+            ]
+        }
+    ]
+}
