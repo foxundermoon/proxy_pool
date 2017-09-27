@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """
 -------------------------------------------------
    File Name：     main.py  
@@ -17,6 +18,7 @@ from multiprocessing import Process
 
 
 sys.path.append('../')
+sys.path.append('./')
 
 from Api.ProxyApi import run as ProxyApiRun
 from Schedule.ProxyValidSchedule import run as ValidRun

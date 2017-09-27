@@ -42,27 +42,32 @@ class ProxyManager(object):
         :return:
         """
         for proxyGetter in self.config.proxy_getter_functions:
-            proxy_dic = dict()
+            proxy_list = list()
             # fetch raw proxy
             for proxy in getattr(GetFreeProxy, proxyGetter.strip())():
+                proxy_list.append(proxy)
                 if isinstance(proxy, str):
                     self.log.info('{func}: fetch proxy {proxy}'.format(
                         func=proxyGetter, proxy=proxy))
-                    proxy_dic[proxy.strip()] = 1
                 elif isinstance(proxy, tuple):
                     ipPort, extra = proxy
                     self.log.info("{func}: fetch proxy {ipPort}:{extra}".format(
                         func=proxyGetter,
                         ipPort=ipPort,
-                        extra=json.dumps(extra)
+                        extra=extra
                     ))
-                    proxy_dic[ipPort] = extra
 
             # store raw proxy
-            for proxy in proxy_dic:
-                if self.db.existsUsed(proxy):
+            for proxy in proxy_list:
+                ipPort = None
+                extra = None
+                if isinstance(proxy, str):
+                    ipPort = proxy
+                if isinstance(proxy, tuple):
+                    ipPort, extra = proxy
+                if self.db.existsUsed(ipPort):
                     continue
-                self.db.putRaw(proxy, extra)
+                self.db.putRaw(ipPort, extra)
 
     def get(self):
         """
@@ -83,18 +88,18 @@ class ProxyManager(object):
         :param proxy:
         :return:
         """
-        self.db.changeTable(self.useful_proxy_queue)
-        self.db.delete(proxy)
+        self.db.deleteAll(proxy)
 
-    def getAll(self):
+    def getAll(self, **kwargs):
         """
         get all proxy from pool as list
         :return:
         """
-        item_dict = self.db.getAllUsed()
         rst = dict()
-        for k in item_dict:
-            rst[k] = self.db.getRaw(k)
+        item_dict = self.db.getAllUsed()
+        if item_dict:
+            for k, v in item_dict.items():
+                rst[k] = json.loads(v)
         return rst
 
     def getNumber(self):

@@ -18,7 +18,7 @@ import sys
 
 from Util.GetConfig import GetConfig
 from Util.utilClass import Singleton
-from Util.EnvUtil import raw_proxy_queue, useful_proxy_queue
+from Util.EnvUtil import raw_proxy_queue, useful_proxy_queue, proxy_counter_queue
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -106,7 +106,11 @@ class DbClient(object):
         return self.delete(key, **kwargs)
 
     def deleteAll(self, key, **kwargs):
-        return (self.deleteRaw(key, **kwargs), self.deleteUsed(key, **kwargs))
+        rawRst = self.deleteRaw(key, **kwargs)
+        usedRst = self.deleteUsed(key, **kwargs)
+        self.changeCounter()
+        counterRst = self.delete(key, **kwargs)
+        return (rawRst, usedRst, counterRst)
 
     def exists(self, key, **kwargs):
         return self.client.exists(key, **kwargs)
@@ -117,6 +121,10 @@ class DbClient(object):
 
     def pop(self, **kwargs):
         return self.client.pop(**kwargs)
+
+    def popRaw(self, **kwargs):
+        self.changeRaw()
+        return self.pop(**kwargs)
 
     def getAll(self):
         return self.client.getAll()
@@ -129,14 +137,25 @@ class DbClient(object):
         self.changeRaw()
         return self.getAll()
 
+    def increace(self, key, value=1, **kwargs):
+        self.changeCounter()
+        return self.update(key, value, **kwargs)
+
+    def quality(self, key, **kwargs):
+        self.changeCounter()
+        return self.get(key, **kwargs)
+
     def changeTable(self, name):
         self.client.changeTable(name)
 
     def changeRaw(self):
-        self.client.changeTable(raw_proxy_queue)
+        self.changeTable(raw_proxy_queue)
 
     def changeUsed(self):
-        self.client.changeTable(useful_proxy_queue)
+        self.changeTable(useful_proxy_queue)
+
+    def changeCounter(self):
+        self.changeTable(proxy_counter_queue)
 
     def getRaw(self, key, **kwargs):
         self.changeRaw()

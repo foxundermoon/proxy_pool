@@ -85,7 +85,7 @@ class SsdbClient(object):
         :param key:
         :return:
         """
-        self.__conn.hdel(self.name, key)
+        return self.__conn.hdel(self.name, key)
 
     def update(self, key, value):
         if isinstance(value, int):
@@ -99,8 +99,9 @@ class SsdbClient(object):
         proxies = self.__conn.hkeys(self.name)
         if proxies:
             proxy = random.choice(proxies)
+            extra = self.get(proxy)
             self.delete(proxy)
-            return proxy
+            return (proxy, extra)
         return None
 
     def exists(self, key):
@@ -108,10 +109,7 @@ class SsdbClient(object):
 
     def getAll(self):
         item_dict = self.__conn.hgetall(self.name)
-        if EnvUtil.PY3:
-            return {key.decode('utf8'): value.decode('utf8') for key, value in item_dict.items()}
-        else:
-            return item_dict
+        return item_dict
 
     def getNumber(self):
         """

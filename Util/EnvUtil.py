@@ -18,6 +18,7 @@ PY3 = sys.version_info >= (3,)
 
 raw_proxy_queue = 'raw_proxy'
 useful_proxy_queue = 'useful_proxy'
+proxy_counter_queue = 'counter_proxy'
 
 SERVER_IPS = [
     '42.62.120.60',

@@ -18,7 +18,7 @@ from Util.LogHandler import LogHandler
 from Util.WebRequest import WebRequest
 from Util.GetConfig import GetConfig
 from Util.EnvUtil import SERVER_IPS
-
+import json
 logger = LogHandler(__name__, stream=False)
 
 
@@ -82,12 +82,17 @@ def validUsefulProxy(proxy):
     isp = None
     city = None
     type = 'http'
-    extra = None
+    extra = {}
     ipPort = None
     if isinstance(proxy, str):
         ipPort = proxy
     elif isinstance(proxy, tuple):
         ipPort, extra = proxy
+        if isinstance(extra,str):
+            try:
+                extra =json.loads(extra)
+            except Exception as e:
+                logger.error(e)
         isp = extra['isp'] if 'isp' in extra else isp
         city = extra['city'] if 'city' in extra else city
         type = extra['type'] if 'type' in extra else type
